@@ -73,6 +73,31 @@ medical-I2I-benchmark/
 
 ---
 
+## 📊 Datasets
+
+This project uses the IXI dataset with T1 and T2-weighted MRI brain images. We provide two Kaggle datasets:
+
+1. **IXI T2 Dataset**: [haonanzhou1/ixit2](https://www.kaggle.com/datasets/haonanzhou1/ixit2)
+2. **IXI T1 Dataset**: [kbacon/ixi-t1](https://www.kaggle.com/datasets/kbacon/ixi-t1)
+
+### Quick Start: Download Datasets
+
+```bash
+# 1. Get your Kaggle API credentials from https://www.kaggle.com/settings
+# 2. Place kaggle.json in the project root
+# 3. Run the download script
+python scripts/download_datasets.py
+```
+
+The script will automatically:
+- Download both T1 and T2 datasets from Kaggle
+- Extract and organize them into the correct directory structure (`data/t1/` and `data/t2/`)
+- Match corresponding T1 and T2 images by filename
+
+For more details, see [DATASETS.md](DATASETS.md).
+
+---
+
 ## ⚙️ Configuration
 
 Runtime paths (like data, checkpoints, and outputs) are managed through the `utils.py` file, which reads values from environment variables. You can define your own paths by creating a `.env` file in the root directory:

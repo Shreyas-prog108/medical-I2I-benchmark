@@ -3,6 +3,13 @@ import os
 import random
 import torch
 from PIL import Image
+import numpy as np
+
+try:
+    import nibabel as nib
+    HAS_NIBABEL = True
+except ImportError:
+    HAS_NIBABEL = False
 
 
 class UnifiedBrainDataset(Dataset):
@@ -47,10 +54,40 @@ class UnifiedBrainDataset(Dataset):
     def __len__(self):
         return len(self.samples)
 
+    def _load_nifti_slice(self, path, slice_idx=None):
+        """Load a 2D slice from a NIfTI file."""
+        if not HAS_NIBABEL:
+            raise ImportError("nibabel is required to load NIfTI files. Install with: pip install nibabel")
+        
+        nii = nib.load(path)
+        data = nii.get_fdata()
+        
+        # Get middle slice if not specified
+        if slice_idx is None:
+            slice_idx = data.shape[2] // 2
+        
+        # Extract slice
+        slice_data = data[:, :, slice_idx]
+        
+        # Normalize to 0-1
+        slice_data = (slice_data - slice_data.min()) / (slice_data.max() - slice_data.min() + 1e-8)
+        
+        # Convert to PIL Image for compatibility with transforms
+        slice_data = (slice_data * 255).astype(np.uint8)
+        img = Image.fromarray(slice_data.T, mode='L')  # Transpose for correct orientation
+        
+        return img
+
     def __getitem__(self, idx):
         t1_path, t2_path = self.samples[idx]
-        t1_image = Image.open(t1_path).convert("L")
-        t2_image = Image.open(t2_path).convert("L")
+        
+        # Check if files are NIfTI or regular images
+        if t1_path.endswith('.nii') or t1_path.endswith('.nii.gz'):
+            t1_image = self._load_nifti_slice(t1_path)
+            t2_image = self._load_nifti_slice(t2_path)
+        else:
+            t1_image = Image.open(t1_path).convert("L")
+            t2_image = Image.open(t2_path).convert("L")
 
         if self.transform:
             t1_image = self.transform(t1_image)

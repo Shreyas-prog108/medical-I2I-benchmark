@@ -284,7 +284,6 @@ def train_GAN(netG: UNetGenerator2D, netD: NLayerDiscriminator2D, device: str, t
 def main():
     # ---------- Dataset and Model setup ----------
     transform = transforms.Compose([
-        transforms.Pad(padding=(5, 3, 5, 3), fill=0),
         transforms.ToTensor(),  # Normalize to [0, 1]
     ])
 
